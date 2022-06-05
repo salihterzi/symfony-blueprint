@@ -5,7 +5,6 @@ services:
       target: development
     volumes:
       - ./:/app:rw,cached
-      - ./var:/app/var:rw
     restart: unless-stopped
     environment:
       APP_ENV: dev

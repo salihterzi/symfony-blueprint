@@ -78,5 +78,6 @@ RUN set -eux; \
     apk del .build-deps;
 COPY docker/php/conf.d/symfony.dev.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.dev.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
+VOLUME /app/var
 ENTRYPOINT ["docker-entrypoint"]
 CMD ["php-fpm"]
