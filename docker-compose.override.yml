@@ -1,0 +1,14 @@
+version: '3.4'
+services:
+  php:
+    build:
+      target: development
+    volumes:
+      - ./:/app:rw,cached
+    restart: unless-stopped
+    environment:
+      APP_ENV: dev
+  webserver:
+    volumes:
+      - ./docker/nginx/default.dev.conf/:/etc/nginx/conf.d/default.dev.conf
+
