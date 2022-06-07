@@ -33,7 +33,12 @@ services:
       - "443:443"
     networks:
       - app-network
-
+  redis:
+    networks:
+      - app-network
+    image: redis:7.0.0
+    ports:
+      - "6379:6379"
 volumes:
   php_socket:
 

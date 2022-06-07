@@ -10,6 +10,7 @@ RUN apk add --no-cache \
 		git \
 	;
 ARG APCU_VERSION=5.1.21
+ARG REDIS_VERSION=5.3.7
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \
 		$PHPIZE_DEPS \
@@ -23,13 +24,13 @@ RUN set -eux; \
 		intl \
 		zip \
 	; \
-	pecl install \
-		apcu-${APCU_VERSION} \
-	; \
+    pecl install apcu-${APCU_VERSION}; \
+    pecl install redis-${REDIS_VERSION}; \
 	pecl clear-cache; \
 	docker-php-ext-enable \
 		apcu \
 		opcache \
+		redis \
 	; \
 	\
 	runDeps="$( \
