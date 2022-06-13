@@ -57,13 +57,14 @@ ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.1/s6-
 RUN tar xzf /tmp/s6-overlay-amd64.tar.gz -C /
 ENTRYPOINT ["/init"]
 
-COPY docker/php/run.sh /etc/services.d/php-fpm/run
-COPY docker/php/finish.sh /etc/services.d/php-fpm/finish
 COPY docker/php/init.sh /etc/cont-init.d/init-php-fpm.sh
+RUN chmod 755 /etc/cont-init.d/init-php-fpm.sh
 
-RUN chmod 755 /etc/services.d/php-fpm/run && \
-    chmod 755 /etc/services.d/php-fpm/finish && \
-    chmod 755 /etc/cont-init.d/init-php-fpm.sh
+COPY docker/php/run.sh /etc/services.d/php-fpm/run
+RUN chmod 755 /etc/services.d/php-fpm/run
+
+COPY docker/php/finish.sh /etc/services.d/php-fpm/finish
+RUN chmod 755 /etc/services.d/php-fpm/finish
 
 ###### deployment
 FROM symfony_base as deployment
@@ -88,8 +89,10 @@ COPY docker/php/conf.d/symfony.dev.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.dev.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
 
 COPY docker/angular/run.sh /etc/services.d/angular/run
+RUN chmod 755 /etc/services.d/angular/run
+
 COPY docker/angular/finish.sh /etc/services.d/angular/finish
-RUN chmod 755 /etc/services.d/angular/run && \
-    chmod 755 /etc/services.d/angular/finish
+RUN chmod 755 /etc/services.d/angular/finish
+
 
 
