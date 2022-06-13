@@ -43,14 +43,9 @@ RUN set -eux; \
 	\
 	apk del .build-deps
 
-COPY docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
-RUN chmod +x /usr/local/bin/docker-healthcheck
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
-
-COPY docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-RUN chmod +x /usr/local/bin/docker-entrypoint
-
 VOLUME /var/run/php
+VOLUME /app/var
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
@@ -58,27 +53,43 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-WORKDIR /app
-EXPOSE 80
+ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.1/s6-overlay-amd64.tar.gz /tmp/
+RUN tar xzf /tmp/s6-overlay-amd64.tar.gz -C /
+ENTRYPOINT ["/init"]
 
+COPY docker/php/run.sh /etc/services.d/php-fpm/run
+COPY docker/php/finish.sh /etc/services.d/php-fpm/finish
+COPY docker/php/init.sh /etc/cont-init.d/init-php-fpm.sh
+
+RUN chmod 755 /etc/services.d/php-fpm/run && \
+    chmod 755 /etc/services.d/php-fpm/finish && \
+    chmod 755 /etc/cont-init.d/init-php-fpm.sh
+
+###### deployment
 FROM symfony_base as deployment
-
+#todo: configuration
 RUN ln -s $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
 COPY docker/php/conf.d/symfony.prod.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.prod.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
-ENTRYPOINT ["docker-entrypoint"]
-CMD ["php-fpm"]
 
+###### development
 FROM symfony_base as development
 ARG XDEBUG_VERSION=3.1.0
+RUN apk add --no-cache
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS; \
     pecl install xdebug-${XDEBUG_VERSION}; \
     pecl clear-cache; \
     docker-php-ext-enable xdebug; \
+    apk add --no-cache git nodejs npm yarn; \
     apk del .build-deps;
+
 COPY docker/php/conf.d/symfony.dev.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.dev.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
-VOLUME /app/var
-ENTRYPOINT ["docker-entrypoint"]
-CMD ["php-fpm"]
+
+COPY docker/angular/run.sh /etc/services.d/angular/run
+COPY docker/angular/finish.sh /etc/services.d/angular/finish
+RUN chmod 755 /etc/services.d/angular/run && \
+    chmod 755 /etc/services.d/angular/finish
+
+

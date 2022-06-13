@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use DateInterval;
@@ -13,6 +12,7 @@ class HomeController extends AbstractController
     public function __construct(private CacheInterface  $cache)
     {
     }
+
     /**
      * @Route("/home", name="home")
      */
