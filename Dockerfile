@@ -43,9 +43,6 @@ RUN set -eux; \
 	\
 	apk del .build-deps
 
-VOLUME /var/run/php
-VOLUME /app/var
-
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
@@ -53,18 +50,36 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-ADD https://github.com/just-containers/s6-overlay/releases/download/v2.2.0.1/s6-overlay-amd64.tar.gz /tmp/
-RUN tar xzf /tmp/s6-overlay-amd64.tar.gz -C /
+ADD https://github.com/just-containers/s6-overlay/releases/download/v3.1.0.1/s6-overlay-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v3.1.0.1/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
 ENTRYPOINT ["/init"]
+CMD []
 
-COPY docker/php/init.sh /etc/cont-init.d/init-php-fpm.sh
-RUN chmod 755 /etc/cont-init.d/init-php-fpm.sh
+WORKDIR /app
+RUN apk add --no-cache nginx && \
+    mkdir -p /run/nginx /run/php && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
-COPY docker/php/run.sh /etc/services.d/php-fpm/run
-RUN chmod 755 /etc/services.d/php-fpm/run
+COPY docker/nginx/conf.d/default.conf /etc/nginx/http.d/default.conf
 
-COPY docker/php/finish.sh /etc/services.d/php-fpm/finish
-RUN chmod 755 /etc/services.d/php-fpm/finish
+COPY docker/php/type.sh /etc/s6-overlay/s6-rc.d/10-init-php-fpm/type
+COPY docker/php/init.sh /etc/s6-overlay/scripts/10-init-php-fpm
+RUN chmod +x /etc/s6-overlay/scripts/10-init-php-fpm
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/10-init-php-fpm
+COPY docker/php/up.sh /etc/s6-overlay/s6-rc.d/10-init-php-fpm/up
+
+COPY docker/nginx/type.sh /etc/s6-overlay/s6-rc.d/nginx/type
+COPY docker/nginx/run.sh /etc/s6-overlay/s6-rc.d/nginx/run
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/nginx
+COPY docker/nginx/finish.sh /etc/s6-overlay/s6-rc.d/nginx/finish
+
+COPY docker/php/php-fpm.d/type.sh /etc/s6-overlay/s6-rc.d/php-fpm/type
+COPY docker/php/run.sh /etc/s6-overlay/s6-rc.d/php-fpm/run
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/php-fpm
+COPY docker/php/finish.sh /etc/s6-overlay/s6-rc.d/php-fpm/finish
 
 ###### deployment
 FROM symfony_base as deployment
@@ -76,7 +91,6 @@ COPY docker/php/php-fpm.d/zz-docker.prod.conf ${PHP_INI_DIR}-fpm.d/zz-docker.con
 ###### development
 FROM symfony_base as development
 ARG XDEBUG_VERSION=3.1.0
-RUN apk add --no-cache
 RUN set -eux; \
     apk add --no-cache --virtual .build-deps $PHPIZE_DEPS; \
     pecl install xdebug-${XDEBUG_VERSION}; \
@@ -88,11 +102,10 @@ RUN set -eux; \
 COPY docker/php/conf.d/symfony.dev.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.dev.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
 
-COPY docker/angular/run.sh /etc/services.d/angular/run
-RUN chmod 755 /etc/services.d/angular/run
-
-COPY docker/angular/finish.sh /etc/services.d/angular/finish
-RUN chmod 755 /etc/services.d/angular/finish
+COPY docker/angular/type.sh /etc/s6-overlay/s6-rc.d/angular/type
+COPY docker/angular/run.sh /etc/s6-overlay/s6-rc.d/angular/run
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/angular
+COPY docker/angular/finish.sh /etc/s6-overlay/s6-rc.d/angular/finish
 
 
 

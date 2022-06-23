@@ -1,3 +1,9 @@
 controllers:
     resource: ../src/Controller/
     type: attribute
+
+ajax:
+    resource: '../src/Controller/Ajax'
+    type: annotation
+    prefix: /ajax
+    defaults: { _format: json }

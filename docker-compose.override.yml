@@ -5,10 +5,12 @@ services:
       target: development
     volumes:
       - ./:/app:rw,cached
-    restart: unless-stopped
+      - ./var:/app/var:rw
+    restart: "no"
     environment:
       APP_ENV: dev
-  webserver:
-    volumes:
-      - ./docker/nginx/default.dev.conf/:/etc/nginx/conf.d/default.conf
+      XDEBUG_CONFIG: >-
+        client_host=host.docker.internal
+      XDEBUG_MODE: debug
+      PHP_IDE_CONFIG: serverName=localhost
 

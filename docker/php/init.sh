@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv sh
+#!/command/with-contenv sh
 set -e;
 
 PHP_INI_RECOMMENDED="$PHP_INI_DIR/php.ini-production"
