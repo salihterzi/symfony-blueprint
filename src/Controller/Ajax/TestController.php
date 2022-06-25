@@ -4,20 +4,23 @@ namespace App\Controller\Ajax;
 
 use App\Response\InfoResponse;
 use App\Response\MessageType;
+use App\Response\SuccessResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-class HomeController extends AbstractController
+class TestController extends AbstractController
 {
     public function __construct()
     {
     }
 
     /**
-     * @Route("/home", name="home")
+     * @Route("/test", name="test")
      */
     public function index()
     {
-        return InfoResponse::create()->setMessageType(MessageType::SUCCESS_LOGIN);
+        return SuccessResponse::create()->setMessageType(MessageType::SUCCESS_LOGIN)->setData([
+            'attribute'=>"value"
+        ]);
     }
 }
