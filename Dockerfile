@@ -10,6 +10,7 @@ RUN apk add --no-cache \
 		git \
 	;
 ARG APCU_VERSION=5.1.21
+ARG REDIS_VERSION=5.3.7
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \
 		$PHPIZE_DEPS \
@@ -23,13 +24,13 @@ RUN set -eux; \
 		intl \
 		zip \
 	; \
-	pecl install \
-		apcu-${APCU_VERSION} \
-	; \
+    pecl install apcu-${APCU_VERSION}; \
+    pecl install redis-${REDIS_VERSION}; \
 	pecl clear-cache; \
 	docker-php-ext-enable \
 		apcu \
 		opcache \
+		redis \
 	; \
 	\
 	runDeps="$( \
@@ -42,14 +43,6 @@ RUN set -eux; \
 	\
 	apk del .build-deps
 
-COPY docker/php/docker-healthcheck.sh /usr/local/bin/docker-healthcheck
-RUN chmod +x /usr/local/bin/docker-healthcheck
-HEALTHCHECK --interval=10s --timeout=3s --retries=3 CMD ["docker-healthcheck"]
-
-COPY docker/php/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
-RUN chmod +x /usr/local/bin/docker-entrypoint
-
-VOLUME /var/run/php
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
@@ -57,17 +50,45 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
+ADD https://github.com/just-containers/s6-overlay/releases/download/v3.1.0.1/s6-overlay-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v3.1.0.1/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+ENTRYPOINT ["/init"]
+CMD []
+
 WORKDIR /app
-EXPOSE 80
+RUN apk add --no-cache nginx && \
+    mkdir -p /run/nginx /run/php && \
+    ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
+COPY docker/nginx/conf.d/default.conf /etc/nginx/http.d/default.conf
+
+COPY docker/php/type.sh /etc/s6-overlay/s6-rc.d/10-init-php-fpm/type
+COPY docker/php/init.sh /etc/s6-overlay/scripts/10-init-php-fpm
+RUN chmod +x /etc/s6-overlay/scripts/10-init-php-fpm
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/10-init-php-fpm
+COPY docker/php/up.sh /etc/s6-overlay/s6-rc.d/10-init-php-fpm/up
+
+COPY docker/nginx/type.sh /etc/s6-overlay/s6-rc.d/nginx/type
+COPY docker/nginx/run.sh /etc/s6-overlay/s6-rc.d/nginx/run
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/nginx
+COPY docker/nginx/finish.sh /etc/s6-overlay/s6-rc.d/nginx/finish
+
+COPY docker/php/php-fpm.d/type.sh /etc/s6-overlay/s6-rc.d/php-fpm/type
+COPY docker/php/run.sh /etc/s6-overlay/s6-rc.d/php-fpm/run
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/php-fpm
+COPY docker/php/finish.sh /etc/s6-overlay/s6-rc.d/php-fpm/finish
+
+###### deployment
 FROM symfony_base as deployment
-
+#todo: configuration
 RUN ln -s $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
 COPY docker/php/conf.d/symfony.prod.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.prod.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
-ENTRYPOINT ["docker-entrypoint"]
-CMD ["php-fpm"]
 
+###### development
 FROM symfony_base as development
 ARG XDEBUG_VERSION=3.1.0
 RUN set -eux; \
@@ -75,9 +96,16 @@ RUN set -eux; \
     pecl install xdebug-${XDEBUG_VERSION}; \
     pecl clear-cache; \
     docker-php-ext-enable xdebug; \
+    apk add --no-cache git nodejs npm yarn; \
     apk del .build-deps;
+
 COPY docker/php/conf.d/symfony.dev.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.dev.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
-VOLUME /app/var
-ENTRYPOINT ["docker-entrypoint"]
-CMD ["php-fpm"]
+
+COPY docker/angular/type.sh /etc/s6-overlay/s6-rc.d/angular/type
+COPY docker/angular/run.sh /etc/s6-overlay/s6-rc.d/angular/run
+RUN touch /etc/s6-overlay/s6-rc.d/user/contents.d/angular
+COPY docker/angular/finish.sh /etc/s6-overlay/s6-rc.d/angular/finish
+
+
+
