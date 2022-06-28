@@ -13,7 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use function Symfony\Component\Translation\t;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface, Serializable, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -100,35 +100,18 @@ class User implements UserInterface, Serializable, PasswordAuthenticatedUserInte
         return $this->email;
     }
 
-
-    public function serialize()
-    {
-        return serialize($this->__serialize());
-    }
-
-    public function unserialize(string $data)
-    {
-        list (
-            $this->id,
-            $this->email,
-            $this->firstName,
-            $this->lastName,
-            // see section on salt below
-            // $this->salt
-            ) = unserialize($data);
-    }
-
     public function __serialize(): array
     {
         return [
-            $this->id,
-            $this->email,
-            $this->firstName,
-            $this->lastName];
+            'id' => $this->id,
+            'email' => $this->email,
+            'firstName' => $this->firstName,
+            'lastName' => $this->lastName];
     }
 
     public function __unserialize(array $data): void
     {
+
         $this->id = $data['id'];
         $this->email = $data['email'];
         $this->firstName = $data['firstName'];
