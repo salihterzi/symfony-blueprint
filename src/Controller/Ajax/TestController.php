@@ -2,6 +2,7 @@
 
 namespace App\Controller\Ajax;
 
+use App\Request\TestRequest;
 use App\Response\InfoResponse;
 use App\Response\MessageType;
 use App\Response\SuccessResponse;
@@ -14,10 +15,9 @@ class TestController extends AbstractController
     {
     }
 
-    /**
-     * @Route("/test", name="test")
-     */
-    public function index()
+
+    #[Route('/test')]
+    public function index(TestRequest $request)
     {
         return SuccessResponse::create()->setMessageType(MessageType::SUCCESS_LOGIN)->setData([
             'attribute'=>"value"
