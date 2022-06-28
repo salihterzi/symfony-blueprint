@@ -28,7 +28,7 @@
               "projects/defaultApp/src/assets"
             ],
             "styles": [
-              "projects/defaultApp/src/styles.scss"
+              "projects/defaultApp/src/assets/scss/app.scss"
             ],
             "scripts": []
           },
