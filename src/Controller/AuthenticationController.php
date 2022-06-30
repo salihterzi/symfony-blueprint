@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Response\MessageType;
 use App\Response\SuccessResponse;
 use App\Service\AuthenticationService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -13,30 +14,29 @@ use Symfony\Component\Routing\Annotation\Route;
  * @package App\Controller
  * @Route("auth")
  */
-class AuthenticationController
+class AuthenticationController extends AbstractController
 {
     /**
-     * @Route("/login", name="auth_login", methods={"POST"})
-     *
      * @param Request $request
      *
      * @return SuccessResponse
      */
+    #[Route('/login',name:"auth_login",methods: ["POST"] )]
     public function login(Request $request)
     {
         return SuccessResponse::create(MessageType::SUCCESS_LOGIN);
     }
 
     /**
-     * @Route("/user", name="auth_user", methods={"GET"})
-     *
      * @param AuthenticationService $authenticationService
      *
      * @return SuccessResponse
      */
-    public function user(AuthenticationService $authenticationService)
+
+    #[Route('/user',name:"auth_user",methods: ["GET"] )]
+    public function user()
     {
-        return $authenticationService->getAuthResponse();
+        return SuccessResponse::create()->setData(['user'=>$this->getUser()]);
     }
 
     /**

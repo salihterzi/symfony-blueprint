@@ -20,10 +20,25 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    App\Controller\:
+        resource: '../src/Controller/'
+        tags: [ 'controller.service_arguments' ]
+
+    App\Service\AuthenticationService:
+        autowire: true
     App\Request\FormRequestValueResolver:
         arguments:
             - '@validator'
         tags:
             - { name: controller.argument_value_resolver, priority: 50 }
+
+    Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler:
+        arguments:
+            - '@Redis'
+    Redis:
+        # you can also use \RedisArray, \RedisCluster or \Predis\Client classes
+        class: Redis
+        calls:
+            - connect:
+                  - '%env(REDIS_HOST)%'
+                  - '%env(int:REDIS_PORT)%'

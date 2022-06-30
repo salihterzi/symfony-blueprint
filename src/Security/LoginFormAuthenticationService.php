@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Security;
 
 use App\Request\LoginRequest;
+use App\Response\MessageType;
 use App\Response\StatusType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,8 +19,7 @@ class LoginFormAuthenticationService extends AbstractAuthenticator
 {
     public function __construct(
         private ValidatorInterface $validator
-    )
-    {}
+    ){}
 
     public function supports(Request $request): ?bool
     {
