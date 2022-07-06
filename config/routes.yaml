@@ -1,9 +1,12 @@
-controllers:
-    resource: ../src/Controller/
-    type: attribute
+auth:
+    resource: 'App\Controller\AuthenticationController'
+    type: annotation
+    defaults: { _format: json }
 
 ajax:
     resource: '../src/Controller/Ajax'
     type: annotation
     prefix: /ajax
     defaults: { _format: json }
+
+

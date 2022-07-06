@@ -83,8 +83,9 @@ abstract class ApiResponse
     /**
      * @param string $message
      */
-    public function setMessage(string $message): void
+    public function setMessage(string $message): self
     {
         $this->message = $message;
+        return $this;
     }
 }
