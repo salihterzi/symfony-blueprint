@@ -41,6 +41,7 @@ class ResponseSubscriber implements EventSubscriberInterface
             }
 
             $json = $this->serializer->serialize($result, 'json', $context);
+
             $event->setResponse(JsonResponse::fromJsonString($json, $result->getStatusCode()));
         }
 

@@ -17,21 +17,19 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
         private TranslatorInterface $translator,
         private SerializerInterface $serializer
     )
-    {
-    }
+    {}
 
     public function onKernelException(ExceptionEvent $event):void
     {
         if ($event->getRequest()->getRequestFormat() === 'json') {
             $exception = $event->getThrowable();
-            //todo: exception türlerine göre düzenleme yapılacak
+            //todo: add other Exception
             if ($exception instanceof ApiException) {
                 if ($exception instanceof InvalidRequestException) {
                     $response = ErrorResponse::create()
                         ->setStatusCode($exception->getStatusCode())
                         ->setMessage($this->translator->trans($exception->getMessageType()->value))
                         ->setErrors($exception->getErrors());
-
                 } else {
                     $response = ErrorResponse::create()
                         ->setStatusCode($exception->getStatusCode())

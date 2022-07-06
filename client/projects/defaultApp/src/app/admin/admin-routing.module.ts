@@ -1,13 +1,21 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {LoginComponent} from "./login/login.component";
+import {DashboardComponent} from './dashboard/dashboard.component';
+import {PageComponent} from '../shared/layout/page/page.component';
 
 
 const routes: Routes = [
   {
-    path: 'login',
-    component: LoginComponent
+    path: '',
+    component: PageComponent,
+    children: [
+      {
+        path: 'dashboard',
+        component: DashboardComponent
+      }
+    ]
   },
+
 ];
 
 @NgModule({

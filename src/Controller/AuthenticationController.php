@@ -12,8 +12,9 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AuthenticationController
  * @package App\Controller
- * @Route("auth")
  */
+#[Route('auth')]
+
 class AuthenticationController extends AbstractController
 {
     /**
@@ -22,28 +23,18 @@ class AuthenticationController extends AbstractController
      * @return SuccessResponse
      */
     #[Route('/login',name:"auth_login",methods: ["POST"] )]
-    public function login(Request $request)
+    public function login()
     {
-        return SuccessResponse::create(MessageType::SUCCESS_LOGIN);
+        return SuccessResponse::create()->setMessageType(MessageType::SUCCESS_LOGIN);
     }
-
-    /**
-     * @param AuthenticationService $authenticationService
-     *
-     * @return SuccessResponse
-     */
 
     #[Route('/user',name:"auth_user",methods: ["GET"] )]
     public function user()
     {
-        return SuccessResponse::create()->setData(['user'=>$this->getUser()]);
+        return SuccessResponse::create()->setData(['user'=>$this->getUser()])->setGroups(['auth']);
     }
 
-    /**
-     * @Route("/logout", name="auth_logout", methods={"POST"})
-     *
-     * @return SuccessResponse
-     */
+    #[Route('/logout', name:"auth_logout",methods: ["POST"] )]
     public function logout()
     {
         return SuccessResponse::create();

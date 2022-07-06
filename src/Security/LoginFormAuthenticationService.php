@@ -14,11 +14,13 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoginFormAuthenticationService extends AbstractAuthenticator
 {
     public function __construct(
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private TranslatorInterface $translator
     ){}
 
     public function supports(Request $request): ?bool
@@ -55,6 +57,8 @@ class LoginFormAuthenticationService extends AbstractAuthenticator
         }
 
         return new JsonResponse([
+            'statusCode'=>400,
+            'message'=> $this->translator->trans(MessageType::ERROR_LOGIN_BAD_CREDENTIAL->value),
             'status' => StatusType::FAIL
         ], 400);
     }

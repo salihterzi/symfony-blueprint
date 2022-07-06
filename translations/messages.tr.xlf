@@ -14,6 +14,14 @@
                 <source>error</source>
                 <target>Bilinmeyen bir hata meydana geldi.</target>
             </trans-unit>
+            <trans-unit id="error.access_denied">
+                <source>error.access_denied</source>
+                <target>Erişim Engellendi</target>
+            </trans-unit>
+            <trans-unit id="error.login_bad_credential">
+                <source>error.login_bad_credential</source>
+                <target>Kullanıcı adı veya şifre yanlış.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
