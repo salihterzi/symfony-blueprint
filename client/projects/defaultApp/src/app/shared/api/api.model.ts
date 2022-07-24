@@ -1,6 +1,6 @@
 export interface ApiModel {
     status: string;
-    statusCode: number
+    statusCode: number;
     message?: string;
     data?: any;
 }

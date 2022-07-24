@@ -8,20 +8,12 @@ import {ApiModel} from './api.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly headers: HttpHeaders;
-  baseUrl: '/ajax/';
+  baseUrl: string;
   timeout: number;
   private successSource: Subject<any>;
   private infoSource: Subject<any>;
   private errorSource: Subject<any>;
-
-  get success$() {
-    return this.successSource.asObservable();
-  }
-
-  get error$() {
-    return this.errorSource.asObservable();
-  }
+  private readonly headers: HttpHeaders;
 
   constructor(private http: HttpClient,
               private tokenExtractor: HttpXsrfTokenExtractor) {
@@ -29,29 +21,23 @@ export class ApiService {
     this.infoSource = new Subject<any>();
     this.errorSource = new Subject<any>();
     this.timeout = 30000;
+    this.baseUrl= '/ajax/';
     this.headers = new HttpHeaders({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'X-Requested-With': 'XMLHttpRequest',
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'Content-Type': 'application/json',
-      'Accept': 'application/json'
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      Accept: 'application/json'
     });
   }
-
-  private handleResult(json: ApiModel) {
-    this.successSource.next(json);
-    return json;
+  get success$() {
+    return this.successSource.asObservable();
   }
 
-  private handleError(err: HttpErrorResponse) {
-    const statusCode: number = err.status;
-    const message: string = err.error.message ? err.error.message : err.statusText;
-    const errors: any = err.error.errors ? err.error.errors : [];
-
-    const error: any = {statusCode: statusCode, message: message, errors: errors};
-
-    this.errorSource.next(error);
-    return throwError(error);
+  get error$() {
+    return this.errorSource.asObservable();
   }
-
   get(path: string, params: any = {}, baseUrl: string = this.baseUrl,
       requestTimeout: number = this.timeout): Observable<ApiModel> {
     let headers = this.headers;
@@ -101,7 +87,7 @@ export class ApiService {
       const param = params[key];
       if (this.isFileList(param)) {
         if (param.length > 0) {
-          // tslint:disable-next-line:prefer-for-of
+          // eslint-disable-next-line @typescript-eslint/prefer-for-of
           for (let i = 0; i < param.length; i++) {
             formData.append(key, param[i], param[i].name);
           }
@@ -118,4 +104,21 @@ export class ApiService {
   private isFileList(param: any): boolean {
     return param instanceof FileList || (Array.isArray(param) && param.every(p => p instanceof File));
   }
+
+  private handleResult(json: ApiModel) {
+    this.successSource.next(json);
+    return json;
+  }
+
+  private handleError(err: HttpErrorResponse) {
+    const statusCode: number = err.status;
+    const message: string = err.error.message ? err.error.message : err.statusText;
+    const errors: any = err.error.errors ? err.error.errors : [];
+
+    const error: any = {statusCode, message, errors};
+
+    this.errorSource.next(error);
+    return throwError(error);
+  }
+
 }

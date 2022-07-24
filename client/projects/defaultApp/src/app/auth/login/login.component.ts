@@ -10,26 +10,21 @@ import {Router} from '@angular/router';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   loading = false;
-  message: string;
+  message = '';
   errors: any = {};
   model: LoginFormModel = new LoginFormModel();
   loginForm: FormGroup;
-
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
     private router: Router) {
-  }
-
-  ngOnInit(): void {
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email, Validators.minLength(6)]),
       password: new FormControl('', [Validators.required, Validators.minLength(6)])
     });
   }
-
   get email() {
     return this.loginForm.get('email');
   }

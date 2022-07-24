@@ -20,7 +20,7 @@
         </ul>
 
         <button  type="button" class="btn btn-outline-secondary m-lg-1">
-          {{ user.firstName }} {{ user.lastName }}
+          {{ user?.firstName }} {{ user?.lastName }}
         </button>
         <button (click)="logout()" type="button" class="btn btn-outline-danger">
           <i class="fa fa-sign-out"></i>
