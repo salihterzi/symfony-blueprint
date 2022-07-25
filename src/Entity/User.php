@@ -3,12 +3,16 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Tohum\Security\Model\RoleInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: 'users')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -19,7 +23,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['auth'])]
-
     private $firstName;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -33,7 +36,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255)]
     private $password;
 
-    private $roles = [];
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: "users")]
+    #[ORM\JoinTable(name: 'user_roles')]
+    private Collection $roles;
+
+    public function __construct()
+    {
+        $this->roles= new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -94,13 +104,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['auth'])]
     public function getRoles(): array
     {
-        $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        foreach ($this->roles as $role) {
+            $roles[] = 'ROLE_' . strtoupper($role->getName());
+        }
+        return $roles;
     }
+    
+    public function addRole(Role $role): static
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles[] = $role;
+        }
 
+        return $this;
+    }
+    
     public function eraseCredentials()
     {
         // TODO: Implement eraseCredentials() method.

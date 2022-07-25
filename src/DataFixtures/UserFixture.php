@@ -21,6 +21,8 @@ class UserFixture extends Fixture
         $user->setPassword($hashedPassword);
         $user->setFirstName("Admin");
         $user->setLastName("User");
+        $user->addRole($this->getReference('role_admin'));
+
         $manager->persist($user);
 
         $manager->flush();
