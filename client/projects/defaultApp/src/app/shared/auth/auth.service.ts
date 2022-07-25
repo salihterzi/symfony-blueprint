@@ -1,7 +1,7 @@
 import {Inject, Injectable} from '@angular/core';
 import {ApiService} from '../api/api.service';
 import {User} from './user.model';
-import {forkJoin, Observable, of, Subject} from 'rxjs';
+import {Observable, of, Subject} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {DOCUMENT} from '@angular/common';
 
@@ -9,30 +9,31 @@ import {DOCUMENT} from '@angular/common';
   providedIn: 'root'
 })
 export class AuthService {
-  private user: User;
+  private user: User | null;
   private authenticated = false;
-
   private sessionExpiredSource: Subject<void> = new Subject<void>();
+
+  constructor(private apiService: ApiService, @Inject(DOCUMENT) private document: any) {
+    this.user = null;
+    this.apiService.error$.subscribe(err => {
+      this.checkSessionExpiration(err);
+    });
+  }
 
   get sessionExpired$() {
     return this.sessionExpiredSource.asObservable();
   }
 
-  constructor(private apiService: ApiService, @Inject(DOCUMENT) private document: any) {
-    this.apiService.error$.subscribe(err => {
-      this.checkSessionExpiration(err);
-    });
-
-  }
-
   init() {
     return new Promise((resolve, reject) => {
-      this.refreshUser().subscribe(() => {
-        resolve();
-      }, error => {
-        reject();
+      this.refreshUser().subscribe({
+        next: () => {
+          resolve('Completed..');
+        },
+        error: () => {
+          reject();
+        }
       });
-      return;
     });
   }
 
@@ -51,7 +52,7 @@ export class AuthService {
         }));
   }
 
-  fetchUser(): Observable<User> {
+  fetchUser(): Observable<User | null> {
     return this.apiService.get('auth/user', {}, '').pipe(map(json => {
       const data = json.data;
 
@@ -68,7 +69,7 @@ export class AuthService {
     }));
   }
 
-  getUser(): User {
+  getUser(): User | null {
     return this.user;
   }
 
