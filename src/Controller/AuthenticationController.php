@@ -29,9 +29,9 @@ class AuthenticationController extends AbstractController
     }
 
     #[Route('/user',name:"auth_user",methods: ["GET"] )]
-    public function user()
+    public function user(AuthenticationService $authenticationService)
     {
-        return SuccessResponse::create()->setData(['user'=>$this->getUser()])->setGroups(['auth']);
+        return $authenticationService->getAuthResponse();
     }
 
     #[Route('/logout', name:"auth_logout",methods: ["POST"] )]

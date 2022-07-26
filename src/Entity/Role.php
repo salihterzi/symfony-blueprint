@@ -32,6 +32,7 @@ class Role
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->permissions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -66,7 +67,28 @@ class Role
     /**
      * @return Collection
      */
-    public function getUsers(): Collection    {
+    public function getUsers(): Collection
+    {
         return $this->users;
+    }
+
+    /**
+     * @return Collection
+     */
+    public function getPermissions(): Collection
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * @param Permission $permission
+     * @return $this
+     */
+    public function addPermission(Permission $permission): self
+    {
+        if (!$this->permissions->contains($permission)) {
+            $this->permissions[] = $permission;
+        }
+        return $this;
     }
 }

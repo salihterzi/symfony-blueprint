@@ -9,7 +9,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
-use Tohum\Security\Model\RoleInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
@@ -42,7 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->roles= new ArrayCollection();
+        $this->roles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -111,16 +110,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $roles;
     }
-    
+
+    public function getRolesAsCollection()
+    {
+        return $this->roles;
+    }
+
     public function addRole(Role $role): static
     {
         if (!$this->roles->contains($role)) {
             $this->roles[] = $role;
         }
-
         return $this;
     }
-    
+
     public function eraseCredentials()
     {
         // TODO: Implement eraseCredentials() method.

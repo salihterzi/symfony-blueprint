@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Security;
 
 use App\Request\LoginRequest;
 use App\Response\MessageType;
 use App\Response\StatusType;
+use App\Service\AuthenticationService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,9 +21,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 class LoginFormAuthenticationService extends AbstractAuthenticator
 {
     public function __construct(
-        private ValidatorInterface $validator,
-        private TranslatorInterface $translator
-    ){}
+        private ValidatorInterface    $validator,
+        private TranslatorInterface   $translator,
+        private AuthenticationService $authService
+    )
+    {
+    }
 
     public function supports(Request $request): ?bool
     {
@@ -57,9 +62,17 @@ class LoginFormAuthenticationService extends AbstractAuthenticator
         }
 
         return new JsonResponse([
-            'statusCode'=>400,
-            'message'=> $this->translator->trans(MessageType::ERROR_LOGIN_BAD_CREDENTIAL->value),
+            'statusCode' => 400,
+            'message' => $this->translator->trans(MessageType::ERROR_LOGIN_BAD_CREDENTIAL->value),
             'status' => StatusType::FAIL
         ], 400);
     }
+
+    public function createToken(Passport $passport, string $firewallName): TokenInterface
+    {
+        $token = parent::createToken($passport, $firewallName);
+        $token->setAttribute('permissions', $this->authService->createPermission($passport->getUser()));
+        return $token;
+    }
+
 }
