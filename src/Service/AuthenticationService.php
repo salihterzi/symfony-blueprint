@@ -45,11 +45,15 @@ class AuthenticationService
         $permissions = [];
 
         $token = $this->tokenStorage->getToken();
-        if ($token !== null  && $token->hasAttribute('permissions')) {
-            $permissions = $token->getAttribute('permissions');
+        if ($token !== null && $token->hasAttribute('permissions')) {
+            $permissionsAttrs = $token->getAttribute('permissions');
+            foreach ($permissionsAttrs as $key => $value) {
+                $permission[$key] = true;
+                array_push($permissions, $permission);
+            }
         }
 
-        return $permissions;
+        return $permissionsAttrs;
     }
 
     public function getAuthResponse(): SuccessResponse
@@ -57,7 +61,7 @@ class AuthenticationService
         $currentUser = $this->getCurrentUser();
         $user = null;
 
-        if (null !== $currentUser) {
+        if ($currentUser !== null) {
             $user = [
                 'email' => $currentUser->getEmail(),
                 'firstName' => $currentUser->getFirstName(),
@@ -67,7 +71,7 @@ class AuthenticationService
             $user['permissions'] = $this->getPermissions();
         }
 
-        return SuccessResponse::create()->setData(['user'=>$user])->setGroups(['auth']);
+        return SuccessResponse::create()->setData(['user' => $user])->setGroups(['auth']);
 
     }
 

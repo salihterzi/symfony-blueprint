@@ -1,9 +1,8 @@
-import {Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ApiService} from '../api/api.service';
 import {User} from './user.model';
 import {Observable, of, Subject} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import {DOCUMENT} from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +12,7 @@ export class AuthService {
   private authenticated = false;
   private sessionExpiredSource: Subject<void> = new Subject<void>();
 
-  constructor(private apiService: ApiService, @Inject(DOCUMENT) private document: any) {
+  constructor(private apiService: ApiService) {
     this.user = null;
     this.apiService.error$.subscribe(err => {
       this.checkSessionExpiration(err);
@@ -62,6 +61,7 @@ export class AuthService {
           email: data.user.email,
           firstName: data.user.firstName,
           lastName: data.user.lastName,
+          permissions:data.user.permissions
         };
       } else {
         return null;
@@ -85,5 +85,24 @@ export class AuthService {
     if (this.authenticated && err.statusCode && err.statusCode === 401) {
       this.sessionExpiredSource.next();
     }
+  }
+
+  hasPermissions(permissions: string[], param: any = null): boolean {
+    if (permissions.length === 0) {
+      return true;
+    }
+    for (const permission of permissions) {
+        if (this.user?.permissions.hasOwnProperty(permission)) {
+          const permissionVal = this.user?.permissions[permission];
+          if (Array.isArray(permissionVal)) {
+            if (permissionVal.indexOf(param) >= 0) {
+              return true;
+            }
+          } else {
+            return true;
+          }
+        }
+    }
+    return false;
   }
 }
