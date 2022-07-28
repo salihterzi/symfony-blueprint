@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20220725125728 extends AbstractMigration
+final class Version20220728130248 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -31,23 +31,21 @@ final class Version20220725125728 extends AbstractMigration
         $this->addSql('CREATE TABLE user_roles (user_id INTEGER NOT NULL, role_id INTEGER NOT NULL, PRIMARY KEY(user_id, role_id))');
         $this->addSql('CREATE INDEX IDX_54FCD59FA76ED395 ON user_roles (user_id)');
         $this->addSql('CREATE INDEX IDX_54FCD59FD60322AC ON user_roles (role_id)');
-        $this->addSql('DROP TABLE permission');
-        $this->addSql('DROP TABLE permission_group');
-        $this->addSql('DROP TABLE user');
+        $this->addSql('CREATE TABLE messenger_messages (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, body CLOB NOT NULL, headers CLOB NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL, available_at DATETIME NOT NULL, delivered_at DATETIME DEFAULT NULL)');
+        $this->addSql('CREATE INDEX IDX_75EA56E0FB7336F0 ON messenger_messages (queue_name)');
+        $this->addSql('CREATE INDEX IDX_75EA56E0E3BD61CE ON messenger_messages (available_at)');
+        $this->addSql('CREATE INDEX IDX_75EA56E016BA31DB ON messenger_messages (delivered_at)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE permission (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, permission_group_id INTEGER DEFAULT NULL, name VARCHAR(100) NOT NULL COLLATE BINARY, display_name VARCHAR(100) NOT NULL COLLATE BINARY)');
-        $this->addSql('CREATE INDEX IDX_E04992AAB6C0CF1 ON permission (permission_group_id)');
-        $this->addSql('CREATE TABLE permission_group (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, name VARCHAR(100) NOT NULL COLLATE BINARY, display_name VARCHAR(100) NOT NULL COLLATE BINARY)');
-        $this->addSql('CREATE TABLE user (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, first_name VARCHAR(255) NOT NULL COLLATE BINARY, last_name VARCHAR(255) NOT NULL COLLATE BINARY, email VARCHAR(255) NOT NULL COLLATE BINARY, password VARCHAR(255) NOT NULL COLLATE BINARY)');
         $this->addSql('DROP TABLE permission_groups');
         $this->addSql('DROP TABLE permissions');
         $this->addSql('DROP TABLE roles');
         $this->addSql('DROP TABLE role_permissions');
         $this->addSql('DROP TABLE users');
         $this->addSql('DROP TABLE user_roles');
+        $this->addSql('DROP TABLE messenger_messages');
     }
 }
