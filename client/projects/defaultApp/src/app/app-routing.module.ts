@@ -1,9 +1,22 @@
 import {NgModule} from '@angular/core';
-import {Routes, RouterModule} from '@angular/router';
+import { RouterModule, Route} from '@angular/router';
 import {WelcomeComponent} from './welcome/welcome.component';
 import {AuthGuard} from './shared/auth/auth.guard';
 
-const routes: Routes = [
+export interface UiRouteData {
+  [name: string]: any;
+  title?: string;
+  permissions?: string[];
+  permissionParam?: any;
+}
+
+export interface UiRoute extends Route {
+  data?: UiRouteData;
+  children?: UiRoutes;
+}
+export declare type UiRoutes = UiRoute[];
+
+const routes: UiRoutes = [
   {
     path: '',
     component: WelcomeComponent,

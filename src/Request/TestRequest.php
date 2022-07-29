@@ -3,6 +3,7 @@
 namespace App\Request;
 
 use JetBrains\PhpStorm\ArrayShape;
+use phpDocumentor\Reflection\Types\True_;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
@@ -13,11 +14,12 @@ class TestRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'testFİeld' => [
-                new NotBlank(),
-                new Email()
-            ],
-        ];
+//        return [
+//            'testField' => [
+//                new NotBlank(),
+//                new Email()
+//            ],
+//        ];
+        return [];
     }
 }

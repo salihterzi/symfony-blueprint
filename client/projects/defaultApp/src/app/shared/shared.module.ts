@@ -5,17 +5,19 @@ import {FooterComponent} from './layout/footer/footer.component';
 import {PageComponent} from './layout/page/page.component';
 import {RouterModule} from '@angular/router';
 import {AuthService} from './auth/auth.service';
+import { PermissionDirective } from './auth/permission.directive';
 
 export function initApp(initService: AuthService) {
   return () => initService.init();
 }
 @NgModule({
-  declarations: [NavbarComponent, FooterComponent, PageComponent],
-  exports: [
-    PageComponent,
-    NavbarComponent,
-    FooterComponent
-  ],
+  declarations: [NavbarComponent, FooterComponent, PageComponent, PermissionDirective],
+    exports: [
+        PageComponent,
+        NavbarComponent,
+        FooterComponent,
+        PermissionDirective
+    ],
   imports: [
     CommonModule,
     RouterModule

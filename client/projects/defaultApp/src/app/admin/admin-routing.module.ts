@@ -1,17 +1,26 @@
 import {NgModule} from '@angular/core';
-import {Routes, RouterModule} from '@angular/router';
+import {RouterModule} from '@angular/router';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {PageComponent} from '../shared/layout/page/page.component';
+import {TestComponent} from "./test/test.component";
+import {UiRoutes} from "../app-routing.module";
+import {PermissionGuard} from "../shared/auth/permission.guard";
 
 
-const routes: Routes = [
+const routes: UiRoutes = [
   {
     path: '',
     component: PageComponent,
+    canActivateChild: [PermissionGuard],
     children: [
       {
         path: 'dashboard',
         component: DashboardComponent
+      },
+      {
+        path: 'test',
+        component: TestComponent,
+        data: {permissions: ['CAN_TEST_PERMISSION']}
       }
     ]
   },

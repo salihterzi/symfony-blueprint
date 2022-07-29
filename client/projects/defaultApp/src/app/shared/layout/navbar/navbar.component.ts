@@ -23,7 +23,9 @@ export class NavbarComponent implements OnInit {
 
   logout() {
     this.authService.logout().subscribe(json => {
-      this.router.navigate(['/user/login']);
+      this.authService.refreshUser().subscribe(json => {
+        this.router.navigate(['/user/login']);
+      });
     });
   }
 
