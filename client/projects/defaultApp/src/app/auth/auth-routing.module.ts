@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import {LoginComponent} from './login/login.component';
 import {UiRoutes} from "../app-routing.module";
+import {AuthReverseGuard} from "../shared/auth/auth-reverse.guard";
 
 const routes: UiRoutes = [
   {
     path: 'login',
+    canActivate:[AuthReverseGuard],
     component: LoginComponent
   }
 ];
