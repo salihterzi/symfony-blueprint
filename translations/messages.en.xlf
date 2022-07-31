@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="success">
+                <source>success</source>
+                <target>Success.</target>
+            </trans-unit>
+             <trans-unit id="success.login">
+                <source>success.login</source>
+                <target>Success login</target>
+            </trans-unit>
+            <trans-unit id="error">
+                <source>error</source>
+                <target>An unknown error occured.</target>
+            </trans-unit>
+            <trans-unit id="error.access_denied">
+                <source>error.access_denied</source>
+                <target>Access Denied</target>
+            </trans-unit>
+            <trans-unit id="error.login_bad_credential">
+                <source>error.login_bad_credential</source>
+                <target>Wrong username or password</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

@@ -6,7 +6,8 @@
 
 # Email spool folder
 /app/spool/*
-
+/.env.local
+/.env.test
 # Cache, session files and logs (Symfony3)
 /var/cache/*
 /var/logs/*
@@ -50,3 +51,22 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+
+.idea
+.idea/*
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###
+
+###> symfony/phpunit-bridge ###
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###

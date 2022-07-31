@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  php:
+    container_name: symfony_blueprint_app
+    build:
+      context: ./
+      target: deployment
+    restart: "no"
+    working_dir: /app
+    ports:
+      - "8000:80"
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+  redis:
+    image: redis:7.0.0
+    ports:
+      - "6379:6379"
+

@@ -1,0 +1,18 @@
+version: '3.4'
+services:
+  php:
+    build:
+      target: development
+    volumes:
+      - ./:/app:rw,cached
+      - ./var:/app/var:rw
+    restart: "no"
+    environment:
+      APP_ENV: dev
+      XDEBUG_CONFIG: >-
+        client_host=host.docker.internal
+      XDEBUG_MODE: debug
+      PHP_IDE_CONFIG: serverName=localhost
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
