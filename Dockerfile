@@ -11,44 +11,10 @@ RUN apk add --no-cache \
 	;
 ARG APCU_VERSION=5.1.21
 ARG REDIS_VERSION=5.3.7
-RUN set -eux; \
-	apk add --no-cache --virtual .build-deps \
-		$PHPIZE_DEPS \
-		icu-dev \
-		libzip-dev \
-		zlib-dev \
-	; \
-	\
-	docker-php-ext-configure zip; \
-	docker-php-ext-install -j$(nproc) \
-		intl \
-		zip \
-	; \
-    pecl install apcu-${APCU_VERSION}; \
-    pecl install redis-${REDIS_VERSION}; \
-	pecl clear-cache; \
-	docker-php-ext-enable \
-		apcu \
-		opcache \
-		redis \
-	; \
-	\
-	runDeps="$( \
-		scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
-			| tr ',' '\n' \
-			| sort -u \
-			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-	)"; \
-	apk add --no-cache --virtual .phpexts-rundeps $runDeps; \
-	\
-	apk del .build-deps
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
-ENV COMPOSER_ALLOW_SUPERUSER=1
-
-ENV PATH="${PATH}:/root/.composer/vendor/bin"
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+RUN chmod +x /usr/local/bin/install-php-extensions && \
+    install-php-extensions intl zip apcu-${APCU_VERSION} redis-${REDIS_VERSION} @composer-2
 
 ADD https://github.com/just-containers/s6-overlay/releases/download/v3.1.0.1/s6-overlay-noarch.tar.xz /tmp
 RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
@@ -91,13 +57,9 @@ COPY docker/php/php-fpm.d/zz-docker.prod.conf ${PHP_INI_DIR}-fpm.d/zz-docker.con
 ###### development
 FROM symfony_base as development
 ARG XDEBUG_VERSION=3.1.0
-RUN set -eux; \
-    apk add --no-cache --virtual .build-deps $PHPIZE_DEPS; \
-    pecl install xdebug-${XDEBUG_VERSION}; \
-    pecl clear-cache; \
-    docker-php-ext-enable xdebug; \
-    apk add --no-cache git nodejs npm yarn; \
-    apk del .build-deps;
+
+RUN install-php-extensions xdebug-${XDEBUG_VERSION}
+RUN apk add --no-cache git nodejs npm yarn
 
 COPY docker/php/conf.d/symfony.dev.ini $PHP_INI_DIR/conf.d/symfony.ini
 COPY docker/php/php-fpm.d/zz-docker.dev.conf ${PHP_INI_DIR}-fpm.d/zz-docker.conf
