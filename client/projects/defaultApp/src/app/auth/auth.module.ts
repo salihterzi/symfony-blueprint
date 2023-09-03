@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthRoutingModule } from './auth-routing.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {LoginComponent} from './login/login.component';
+import {NgxValidateCoreModule} from "@ngx-validate/core";
 
 
 @NgModule({
@@ -11,8 +12,9 @@ import {LoginComponent} from './login/login.component';
   imports: [
     CommonModule,
     AuthRoutingModule,
+    FormsModule,
     ReactiveFormsModule,
-    FormsModule
+    NgxValidateCoreModule.forRoot()
   ]
 })
 export class AuthModule { }

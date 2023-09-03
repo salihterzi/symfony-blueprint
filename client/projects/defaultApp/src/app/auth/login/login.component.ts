@@ -1,14 +1,17 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, } from '@angular/core';
 import {AuthService} from '../../shared/auth/auth.service';
 import {ApiService} from '../../shared/api/api.service';
 import {LoginFormModel} from './login-form.model';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
+import {validatePassword} from "@ngx-validate/core";
+const { minLength, required, requiredTrue ,email } = Validators;
+const validPassword = validatePassword(['small', 'capital', 'number']);
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
   loading = false;
@@ -19,23 +22,22 @@ export class LoginComponent {
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
+    private fb: FormBuilder,
     private router: Router) {
-    this.loginForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email, Validators.minLength(6)]),
-      password: new FormControl('', [Validators.required, Validators.minLength(6)])
-    });
-  }
-  get email() {
-    return this.loginForm.get('email');
-  }
 
-  get password() {
-    return this.loginForm.get('password');
+    const credentials = this.fb.group(
+      {
+        email: [null, [required, minLength(6),email]],
+        password: [null, [required, minLength(6), validPassword]],
+      }
+    );
+
+    this.loginForm = this.fb.group({ credentials });
   }
 
   submitLoginForm() {
     this.loading = true;
-    this.apiService.post('/login', this.loginForm.value, 'auth').subscribe(
+    this.apiService.post('/login', this.loginForm.value.credentials, 'auth').subscribe(
       (data) => {
         this.authService.refreshUser().subscribe(() => {
           this.router.navigate(['admin/dashboard']);

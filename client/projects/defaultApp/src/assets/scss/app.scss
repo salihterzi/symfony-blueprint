@@ -55,3 +55,12 @@ $fa-font-path: "~font-awesome/fonts";
 // Utilities
 @import "~bootstrap/scss/utilities/api";
 // scss-docs-end import-stack
+.is-invalid .form-control {
+  border-color: #dc3545;
+  border-style: dashed !important;
+}
+
+.is-invalid .invalid-feedback,
+.is-invalid + * .invalid-feedback {
+  display: block;
+}

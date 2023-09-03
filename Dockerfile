@@ -8,6 +8,9 @@ RUN apk add --no-cache \
 		file \
 		gettext \
 		git \
+        python3  \
+        make \
+        g++ \
 	;
 ARG APCU_VERSION=5.1.21
 ARG REDIS_VERSION=5.3.7
